@@ -19,35 +19,7 @@
 \begin{document}
 
 \maketitle
-\if 0
-\section*{Overview}
-This purpose of this assignment is for you to become familiar with understanding the main concepts and notation of asymptotic analysis of algorithms, to gain practice writing simple mathematical proofs, to learn how to read and write pseudocode algorithms, and to practice using binary search and writing and analysing recursive algorithms.
 
-\section*{Marks}
-This assignment is worth 15\% of your total grade. COMP3506 students will be marked on questions 1 to 4 out of \textbf{50 marks}. COMP7505 are required to additionally do question 5 and will be marked out of \textbf{60 marks}.\\\\
-Partial marks \textit{may} be awarded for partially correct answers and answers lacking justification where it is required.
-
-\section*{Submission Instructions}
-\begin{itemize}
-	\item Your answers to the written questions should be submitted as a file called \textbf{A1-[Your Student Number Here].pdf} via the \texttt{Homework 1 - Written} submission. Do not include your full name in your pdf submission.
-	\item \textbf{Hand-written answers will not be marked.} If you are comfortable with the \LaTeX\  typesetting
-	      system, it is strongly recommended that you write your answers using it, however it is not a requirement.
-	\item Your solution to Q3a will be submitted via Gradescope to the \texttt{Homework 1 - Q3 Programming} submission. You should only submit your completed \texttt{ArrayCartesianPlane.java} file. No marks will be awarded for non-compiling submissions, or submissions which import non-supported 3rd party libraries. You should follow all constraints laid out in question 3 or risk losing marks for the question.
-\end{itemize}
-
-\section*{Late Submissions and Extensions}
-Late submissions will not be accepted. It is your responsibility to ensure you have submitted your
-work well in advance of the deadline (taking into account the possibility of computer, internet, or Gradescope
-issues). You are allowed to submit multiple times, and only the latest submission before the deadline will be marked. See the ECP for information about extensions.
-\section*{Academic Misconduct}
-This assignment is an individual assignment. Posting questions or copying answers from the internet is considered cheating, as is sharing your answers with classmates. All your work (including code) will be analysed by sophisticated plagiarism detection software. \\\\
-Students are reminded of the University’s policy on student misconduct, including plagiarism. See
-the course profile and the School web page:
-\url{http://www.itee.uq.edu.au/itee-student-misconduct-including-plagiarism}.\\
-
-\newpage 
-
-\fi 
 \section*{Questions}
 
 \begin{enumerate}
@@ -80,40 +52,71 @@ the course profile and the School web page:
 	      For all of the following questions, you must assume that $n$ is a positive integer.
 	      	      
 	      \begin{enumerate}
-	      	\item (3 marks) Represent the running time (i.e. the number of primitive operations) of the algorithm 
-	      	      when the input $n$ is \textbf{odd}, as a mathematical function called $T_{\text{odd}}(n)$. State all assumptions made and explain all your reasoning.
+	      	\item (3 marks) Represent the running time (i.e. the number of primitive operations) of the algorithm when the input $n$ is \textbf{odd}, as a mathematical function called $T_{\text{odd}}(n)$. State all assumptions made and explain all your reasoning.
 	      	      
-	      	      \begin{Solution}
-	      	      \end{Solution}
+			\begin{Solution}
+
+				In the above pseudocode for an odd $n$, a while loop is run for $n$ iterations. Within the loop 3 primitive operations (a bitwise AND, an addition and a single bitshit) are all performed. This means that each of the 3 primitive operations are run $n$ and hence $T_{odd}(n) = 3n$ for both the tight and worse-case bounds.
+			\end{Solution}
+
+			\medskip
 	      	      	      	                  
-	      	\item (2 marks) Find a function $g(n)$ such that $T_{\text{odd}}(n)\in O(g(n))$. 
-	      	      Your $g(n)$ should be such that the Big-O bound is as tight as possible (e.g. no constants or lower order terms). 
-	      	      Using the formal definition of Big-O, prove this bound and explain all your reasoning. 
+	      	\item (2 marks) Find a function $g(n)$ such that $T_{\text{odd}}(n)\in O(g(n))$. Your $g(n)$ should be such that the Big-O bound is as tight as possible (e.g. no constants or lower order terms). Using the formal definition of Big-O, prove this bound and explain all your reasoning. 
 	      	      	      	                  
-	      	      (Hint: you need to find values of $c$ and $n_0$ to prove the Big-O bound you gave is valid).
+	      	(Hint: you need to find values of $c$ and $n_0$ to prove the Big-O bound you gave is valid).
 	      	      
-	      	       \begin{Solution}
-	      	      \end{Solution}
+			\begin{Solution}
+
+				Using the definition of Big-O: $f(n)$ is $O(g(n))$ if there exists a real number $c > 0$ and real number $n_0 > 0$ such that $f(n) \leq cg(n)$, for $n \geq n_0$.
+
+				The constants $c = 3$ and $n_0 = 1$ can be substituted to show that $T_{odd}(n) = 3n$ is $O(n)$ and thus $g(n) = n$. $f(n) = 3n$ and $cg(n) = 3n$ as well, so for all $n \geq 1$, $f(n)$ and $cg(n)$ must all be equal. This satisfies the conditions of the Big-O definition and hence it is proven that $g(n) = n$.
+			\end{Solution}
+
+			\medskip
 	      	      	      	                  
 	      	\item (2 marks) Similarly, find the tightest Big-$\Omega$ bound of $T_{\text{odd}}(n)$ and use the formal definition of Big-$\Omega$ to prove the bound is correct. Does a Big-$\Theta$ bound for $T_{\text{odd}}(n)$ exist? If so, give it. If not, explain why it doesn't exist.
 	      	
-	      	\begin{Solution}
+			\begin{Solution}
+
+				Using the definition of Big-$\Omega$: $f(n)$ is $\Omega(g(n))$ if there exist positive constants $c$ and $n_0$ such that $f(n) \geq cg(n)$ for all $n \geq n_0$.
+
+				Once again, the constants $c = 3$ and $n_0 = 1$ can be substituted to show that $T_{odd}(n) = 3n$ is $\Omega(n)$ and thus $g(n) = n$. Taking, $f(n) = 3n$ and $cg(n) = 3n$, it is clear that for all $n \geq 1$, $f(n) = cg(n)$ and hence the definition is satisfied.
+				
+				\medskip
+
+				A Big-$\Theta$ bound does exist. Using the definition of Big-$\Theta$: $f(n)$ is $\Theta(g(n))$ if there exist positive constants $c_1$, $c_2$ and $n_0$ such that $c_1g(n) \leq f(n) \leq c_2g(n)$ for all $n \geq n_0$.
+
+				Since the Big-O and Big-$\Theta$ bounds are both $n$, the constants $c_1 = c_2 = 3$ and $n_0 = 1$ can be used. This would result in $c_1g(n) = c_2g(n) = 3n$ which is also equal to $f(n)$ for all $n \geq 1$. Thus the above definition is satisfied and the Big-$\Theta$ bound must be $\Theta(n)$. 
 	      	\end{Solution}
-	      	      	      	                  
+								  
+			\medskip
 	      	      	      	                  
 	      	\item (3 marks) Represent the running time (as you did in part (a)) for the algorithm when the input $n$ is \textbf{even}, as a function called $T_{\text{even}}(n)$. State all assumptions made and explain all your reasoning. Also give a tight Big-O and Big-$\Omega$ bound on $T_{\text{even}}(n)$. You do \textbf{not} need to formally prove these bounds.
 	      	
-	      	\begin{Solution}
-	      	\end{Solution}
+			\begin{Solution}
+			
+				If $n$ is even, there is a loop that loops $n$ times with a nested loop that operates $n^2$ times. Within the nested loop there are two add operations and hence two primitive operations. Thus the running time $T_{\text{even}}(n) = n \times n^2 \times 2 = 2n^3$.
+
+				\medskip
+
+				The Big-O bound must thus be $O(n^3)$ and the Big-$\Theta$ is also $\Theta(n^3)$. These are both the tightest bounds.
+			\end{Solution}
+			\medskip
 	      	      	      	                  
-	      	\item (2 marks) The running time for the algorithm has a best case and worst case, and which case occurs for a 
-	      	      given input $n$ to the algorithm depends on the parity of $n$.
+	      	\item (2 marks) The running time for the algorithm has a best case and worst case, and which case occurs for a given input $n$ to the algorithm depends on the parity of $n$.
 	      	      	      	                  
-	      	      Give a Big-O bound on the \textbf{best case} running time of the algorithm, and a Big-$\Omega$ bound on 
-	      	      the \textbf{worst case} running time of the algorithm (and state which parity of the input corresponds with which case).
-	        \begin{Solution}
-	      	\end{Solution}
-	      	      	      	      
+			Give a Big-O bound on the \textbf{best case} running time of the algorithm, and a Big-$\Omega$ bound on the \textbf{worst case} running time of the algorithm (and state which parity of the input corresponds with which case).
+
+			\begin{Solution}
+				
+				The best case running time of the algorithm occurs when the input $n$ is odd. This is because the running time for odd $n$ is $3n$ whereas the running time for even $n$ is $2n^3$. The Big-O bound for the odd case is $O(n)$.
+
+				Conversely, the worst case must be for the even case or when the running time is $2n^3$. The Big-$\Theta$ for this case is $O(n^3)$.
+
+				Both of these bounds have been proven in previous sections.
+			\end{Solution}
+			  
+			\medskip     	      	      	      
 	      	      	      	                  
 	      	\item (2 marks) We can represent the runtime of the entire algorithm, say $T(n)$, as
 	      	      \begin{align*}
@@ -124,20 +127,30 @@ the course profile and the School web page:
 	      	      \end{align*}
 	      	      Give a Big-$\Omega$ and Big-$O$ bound on $T(n)$ using your previous results. If a Big-$\Theta$ bound for the entire algorithm exists, describe it. If not, explain why it doesn’t exist.
 	      	      
-	      	\begin{Solution}
+			\begin{Solution}
+				The Big-O bound for $T(n)$ is $O(n^3)$ and the Big-$\Omega$ bound for $T(n)$ is $\Omega(n)$. This is because only $n^3$ is the tightest bound that is greater than or equal to $T(n)$ for any $n > 1$ and $n$ is the tightest bound that is less than or equal to $T(n)$ for any $n > 1$.
+
+				\medskip
+
+				There is no Big-$\Theta$ bound for this algorithm as there is no $g(n)$ that could be less than $T(n)$ when multiplied by one constant while being greater than $T(n)$ when multiplied by another constant. This is because $T_{\text{even}}(n)$ is a third degree polynomial and $T_{\text{odd}}(n)$ is a linear function. Thus any $g(n)$ would cross through either of subfunctions of $T(n)$. So, the requisites of Big-$\Theta$ bound are not met and so there is no Big-$\Theta$ bound.
 	      	\end{Solution}
-	      	      	      	                  
-	      	\item (2 marks) Your classmate tells you that Big-O represents the worst case runtime of an algorithm, and similarly that 
-	      	      Big-$\Omega$ represents the best case runtime. Is your classmate correct? Explain why/why not. 
-	      	      Your answers for (e) and (f) \textit{may} be useful for answering this.
+						   
+			\medskip
+
+	      	\item (2 marks) Your classmate tells you that Big-O represents the worst case runtime of an algorithm, and similarly that Big-$\Omega$ represents the best case runtime. Is your classmate correct? Explain why/why not. Your answers for (e) and (f) \textit{may} be useful for answering this.
 	      	      
-	      	\begin{Solution}
-	      	\end{Solution}
+			\begin{Solution}
+				
+				While this can be true in some cases, it can not be generalised. This is because the Big-O of an algorithm is the the tightest bound of the algorithm from above, and thus the worst case, while Big-$\Omega$ is the tightest bound from below and thus the best case. If the best and worst case runtime of the algorithm are both equal, then the classmate's statement is correct.
+			\end{Solution}
+			  
+			\medskip
 	      	      	      	                  
-	      	\item (1 mark) Prove that an algorithm runs in $\Theta (g(n))$ time if and only if its worst-case running time 
-	      	      is $O(g(n))$ and its best-case running time is $\Omega(g(n))$.
+	      	\item (1 mark) Prove that an algorithm runs in $\Theta (g(n))$ time if and only if its worst-case running time is $O(g(n))$ and its best-case running time is $\Omega(g(n))$.
 	      	      
-	      	\begin{Solution}
+			\begin{Solution}
+				
+				
 	      	\end{Solution}
 	      	      	      	                  
 	      \end{enumerate}

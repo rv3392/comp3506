@@ -1,5 +1,7 @@
 public class StrongHeap {
+    /* The default value used for wherever depth is initialised but not set */
     private static final int DEFAULT_DEPTH = -1;
+    /* The default value used for whenever a value is initialised but not set */
     private static final int DEFAULT_VALUE = -1;
 
     /**

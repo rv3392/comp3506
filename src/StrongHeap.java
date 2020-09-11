@@ -1,5 +1,6 @@
 public class StrongHeap {
     private static final int DEFAULT_DEPTH = -1;
+    private static final int DEFAULT_VALUE = -1;
 
     /**
      * Determines whether the binary tree with the given root node is
@@ -18,7 +19,46 @@ public class StrongHeap {
             return false;
         }
 
-        return true;
+        return isSubtreeStrongHeap(root, 0, DEFAULT_VALUE, DEFAULT_VALUE);
+    }
+
+    /**
+     * Checks if the subtree formed by the given root is a strong heap.
+     *
+     * @param subtreeRoot Root of the subtree being checked
+     * @param currentDepth Depth from the root of the main tree of this subtree
+     * @param parentValue Should be set to DEFAULT_VALUE when called externally
+     * @param grandparentValue Should be set to DEFAULT_VALUE when called externally
+     * @return True if the subtree formed by the given root is a strong heap or false otherwise.
+     */
+    private static boolean isSubtreeStrongHeap(BinaryTree<Integer> subtreeRoot, int currentDepth, int parentValue,
+            int grandparentValue) {
+
+        if (currentDepth == 0 && subtreeRoot.isLeaf()) {
+            // If there is a single node in the binary tree then it is automatically a strong heap
+            return true;
+        }
+
+        if (currentDepth >= 2 && subtreeRoot.getValue() + parentValue >= grandparentValue
+                || currentDepth >= 1 && subtreeRoot.getValue() >= parentValue) {
+            // Violates the definition of a strong heap
+            return false;
+        } else if (subtreeRoot.isLeaf()) {
+            // Follows the definition of a strong heap and we've reached a leaf node
+            return true;
+        }
+
+        // If a leaf node wasn't reached but the definition of a strong heap is followed for the current node then
+        // check if the next node follows the strong heap definition.
+        if (subtreeRoot.getRight() == null) {
+            return isSubtreeStrongHeap(subtreeRoot.getLeft(), currentDepth + 1, subtreeRoot.getValue(),
+                    parentValue);
+        } else {
+            return isSubtreeStrongHeap(subtreeRoot.getLeft(), currentDepth + 1, subtreeRoot.getValue(),
+                    parentValue) && isSubtreeStrongHeap(subtreeRoot.getRight(), currentDepth + 1,
+                    subtreeRoot.getValue(), parentValue);
+        }
+
     }
 
     /**

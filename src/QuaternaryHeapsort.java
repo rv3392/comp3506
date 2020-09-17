@@ -30,8 +30,9 @@ public class QuaternaryHeapsort {
         int depth = getDepth(start);
         int i = start;
         int largestChildIndex = getLargestChildIndex(input, getFirstChildIndex(i, depth++));
-        while (largestChildIndex != -1 && input[largestChildIndex].compareTo(input[start]) > 0) {
-            swap(input, i++, largestChildIndex);
+        while (largestChildIndex != -1 && input[largestChildIndex].compareTo(input[i]) > 0) {
+            swap(input, i, largestChildIndex);
+            i = largestChildIndex;
             largestChildIndex = getLargestChildIndex(input, getFirstChildIndex(i, depth++));
         }
     }

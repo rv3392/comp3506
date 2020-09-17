@@ -58,7 +58,7 @@ public class BinaryTreeComparatorTest {
                 tree(leaf(0), 10, leaf(100)),
                 tree(leaf(0), 20, leaf(0))
         ));
-        assertEquals(-1, c.compare(
+        assertEquals(1, c.compare(
                 tree(leaf(10), 10, leaf(10)),
                 tree(leaf(0), 10, leaf(10))
         ));

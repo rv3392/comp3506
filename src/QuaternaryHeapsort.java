@@ -8,7 +8,20 @@ public class QuaternaryHeapsort {
      * @param input to be sorted (modified in place)
      */
     public static <T extends Comparable<T>> void quaternaryHeapsort(T[] input) {
-        // TODO: implement question 1 here
+        // Make sure the root of the heap is the largest element
+        for (int i = 0; i < input.length; i++) {
+            quaternaryDownheap(input, i, input.length);
+        }
+
+        // Progressively swap elements from the end of the heap to the root and downheap after each swap.
+        // After each swap and downheap the root should contain the largest element in the heap.
+        // The end of the array becomes the sorted array as more and more elements are progressively swapped to the end.
+        int end = input.length - 1;
+        while (end >= 0){
+            swap(input, 0, end);
+            quaternaryDownheap(input, 0, end);
+            end--;
+        }
     }
 
     /**

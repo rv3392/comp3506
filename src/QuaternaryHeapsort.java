@@ -27,11 +27,11 @@ public class QuaternaryHeapsort {
     public static <T extends Comparable<T>> void quaternaryDownheap(T[] input, int start, int size) {
         int depth = getDepth(start);
         int i = start;
-        int largestChildIndex = getLargestChildIndex(input, getFirstChildIndex(i, depth++));
-        while (largestChildIndex != -1 && input[largestChildIndex].compareTo(input[i]) > 0) {
+        int largestChildIndex = getLargestChildIndex(input, getFirstChildIndex(i, depth++), size);
+        while (i < size && largestChildIndex != -1 && input[largestChildIndex].compareTo(input[i]) > 0) {
             swap(input, i, largestChildIndex);
             i = largestChildIndex;
-            largestChildIndex = getLargestChildIndex(input, getFirstChildIndex(i, depth++));
+            largestChildIndex = getLargestChildIndex(input, getFirstChildIndex(i, depth++), size);
         }
     }
 
@@ -74,12 +74,12 @@ public class QuaternaryHeapsort {
      *
      * @return The index of the largest child of the firstChild's parent
      */
-    private static <T extends Comparable<T>> int getLargestChildIndex(T[] input, int firstChild) {
-        if (firstChild > input.length - 1) {
+    private static <T extends Comparable<T>> int getLargestChildIndex(T[] input, int firstChild, int size) {
+        if (firstChild > size - 1) {
             return -1;
         }
 
-        int maxIndex = input.length - firstChild;
+        int maxIndex = size - firstChild;
         if (maxIndex > 4) {
             maxIndex = 4;
         }

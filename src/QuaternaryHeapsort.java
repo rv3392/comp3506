@@ -17,16 +17,14 @@ public class QuaternaryHeapsort {
      * A downheap should restore the heap order by swapping downwards as necessary.
      * The array should be modified in place.
      *
-     * Examples:
-     *  - input [0, 10, 20, 30, 40] and start 0 would modify the array to
-     *      [40, 10, 20, 30, 0].
-     *  - input [-1, -1, -1, -1, 0, 10, 20, 30, 40] and start 4 would modify
-     *      the array to [-1, -1, -1, 40, 10, 20, 30, 0].
+     * You should only consider elements in the input array from index 0 to index (size - 1)
+     * as part of the heap (i.e. pretend the input array stops after the inputted size).
      *
      * @param input array representing a quaternary max heap.
      * @param start position in the array to start the downheap from.
+     * @param size the size of the heap in the input array, starting from index 0
      */
-    public static <T extends Comparable<T>> void quaternaryDownheap(T[] input, int start) {
+    public static <T extends Comparable<T>> void quaternaryDownheap(T[] input, int start, int size) {
         int depth = getDepth(start);
         int i = start;
         int largestChildIndex = getLargestChildIndex(input, getFirstChildIndex(i, depth++));

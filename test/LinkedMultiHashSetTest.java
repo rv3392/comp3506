@@ -130,5 +130,126 @@ public class LinkedMultiHashSetTest {
         assertFalse(it.hasNext());
     }
     
+    @Test
+    public void testResizingDistinctStartingAtOne() {
+        LinkedMultiHashSet<Integer> set = new LinkedMultiHashSet<>(1);
+
+        assertEquals(1, set.internalCapacity());
+        assertEquals(0, set.size());
+        assertEquals(0, set.count(2));
+
+        set.add(2);
+        assertEquals(1, set.internalCapacity());
+        assertEquals(1, set.size());
+        assertEquals(1, set.count(2));
+
+        set.add(3);
+        assertEquals(2, set.internalCapacity());
+        assertEquals(2, set.size());
+        assertEquals(1, set.count(2));
+        assertEquals(1, set.count(3));
+
+        set.add(4);
+        assertEquals(4, set.internalCapacity());
+        assertEquals(3, set.size());
+        assertEquals(1, set.count(2));
+        assertEquals(1, set.count(3));
+        assertEquals(1, set.count(4));
+
+        set.add(5);
+        assertEquals(4, set.internalCapacity());
+        assertEquals(4, set.size());
+        assertEquals(1, set.count(2));
+        assertEquals(1, set.count(3));
+        assertEquals(1, set.count(4));
+        assertEquals(1, set.count(5));
+
+        set.add(6);
+        assertEquals(8, set.internalCapacity());
+        assertEquals(5, set.size());
+        assertEquals(1, set.count(2));
+        assertEquals(1, set.count(3));
+        assertEquals(1, set.count(4));
+        assertEquals(1, set.count(5));
+        assertEquals(1, set.count(6));
+    }
+
+    @Test
+    public void testResizingRepeatedStartingAtOne() {
+        LinkedMultiHashSet<Integer> set = new LinkedMultiHashSet<>(1);
+
+        assertEquals(1, set.internalCapacity());
+        assertEquals(0, set.size());
+        assertEquals(0, set.count(2));
+
+        set.add(2);
+        assertEquals(1, set.internalCapacity());
+        assertEquals(1, set.size());
+        assertEquals(1, set.count(2));
+
+        set.add(2);
+        assertEquals(2, set.internalCapacity());
+        assertEquals(2, set.size());
+        assertEquals(2, set.count(2));
+
+        set.add(3);
+        assertEquals(4, set.internalCapacity());
+        assertEquals(3, set.size());
+        assertEquals(2, set.count(2));
+        assertEquals(1, set.count(3));
+
+        set.add(5);
+        assertEquals(4, set.internalCapacity());
+        assertEquals(4, set.size());
+        assertEquals(2, set.count(2));
+        assertEquals(1, set.count(3));
+        assertEquals(1, set.count(5));
+
+        set.add(2);
+        assertEquals(8, set.internalCapacity());
+        assertEquals(5, set.size());
+        assertEquals(3, set.count(2));
+        assertEquals(1, set.count(3));
+        assertEquals(1, set.count(5));
+    }
+
+    @Test
+    public void testResizingMultiAddStartingAtOne() {
+        LinkedMultiHashSet<Integer> set = new LinkedMultiHashSet<>(1);
+
+        assertEquals(1, set.internalCapacity());
+        assertEquals(0, set.size());
+        assertEquals(0, set.count(2));
+
+        set.add(2, 1);
+        assertEquals(1, set.internalCapacity());
+        assertEquals(1, set.size());
+        assertEquals(1, set.count(2));
+
+        set.add(2, 4);
+        assertEquals(8, set.internalCapacity());
+        assertEquals(5, set.size());
+        assertEquals(5, set.count(2));
+
+        set.add(3, 2);
+        assertEquals(8, set.internalCapacity());
+        assertEquals(7, set.size());
+        assertEquals(5, set.count(2));
+        assertEquals(2, set.count(3));
+
+        set.add(5);
+        assertEquals(8, set.internalCapacity());
+        assertEquals(8, set.size());
+        assertEquals(5, set.count(2));
+        assertEquals(2, set.count(3));
+        assertEquals(1, set.count(5));
+
+        set.add(2);
+        assertEquals(16, set.internalCapacity());
+        assertEquals(9, set.size());
+        assertEquals(6, set.count(2));
+        assertEquals(2, set.count(3));
+        assertEquals(1, set.count(5));
+    }
 
 }

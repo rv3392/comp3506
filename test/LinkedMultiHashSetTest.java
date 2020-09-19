@@ -129,6 +129,28 @@ public class LinkedMultiHashSetTest {
 
         assertFalse(it.hasNext());
     }
+
+    @Test
+    public void testIteratorRemovals() {
+        LinkedMultiHashSet<Integer> set = new LinkedMultiHashSet<>(5);
+
+        set.add(4);
+        set.add(1);
+        set.add(2);
+        set.add(1);
+        set.remove(4);
+        set.remove(2);
+
+        Iterator<Integer> it = set.iterator();
+
+        // duplicates
+        assertTrue(it.hasNext());
+        assertEquals(1, (int) it.next());
+        assertTrue(it.hasNext());
+        assertEquals(1, (int) it.next());
+
+        assertFalse(it.hasNext());
+    }
     
     @Test
     public void testResizingDistinctStartingAtOne() {

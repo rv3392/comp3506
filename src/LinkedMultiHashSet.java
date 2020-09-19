@@ -22,7 +22,9 @@ import java.util.NoSuchElementException;
  */
 public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
 
-    private CountableElement<T>[] hashTable;
+    private LinkedCountableElement<T>[] hashTable;
+    private LinkedCountableElement<T> iteratorListHead;
+    private LinkedCountableElement<T> iteratorListTail;
 
     private int numElements;
     private int numDistinctElements;
@@ -34,7 +36,8 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
         this.numElements = 0;
         this.numDistinctElements = 0;
 
-        this.hashTable = (CountableElement<T>[]) new CountableElement[initialCapacity];
+        this.hashTable = (LinkedCountableElement<T>[]) new LinkedCountableElement[initialCapacity];
+        this.iteratorListTail = null;
     }
 
     @Override
@@ -45,7 +48,10 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
 
         if (!this.contains(element)) {
             int insertIndex = this.linearProbing(this.hash(element.hashCode()));
-            this.hashTable[insertIndex] = new CountableElement<T>(element);
+            // TODO: This is a bit messy
+            LinkedCountableElement<T> toAdd = new LinkedCountableElement<T>(element);
+            this.hashTable[insertIndex] = toAdd;
+            this.addToIteratorList(toAdd);
             this.numDistinctElements++;
         } else {
             int index = this.getElementIndexInTable(element);
@@ -63,8 +69,10 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
 
         if (!this.contains(element)) {
             int insertIndex = this.linearProbing(this.hash(element.hashCode()));
-            this.hashTable[insertIndex] = new CountableElement<T>(element);
-            this.hashTable[insertIndex].addToCount(count - 1);
+            LinkedCountableElement<T> toAdd = new LinkedCountableElement<T>(element);
+            toAdd.addToCount(count - 1);
+            this.hashTable[insertIndex] = toAdd;
+            this.addToIteratorList(toAdd);
             this.numDistinctElements++;
         } else {
             int index = this.getElementIndexInTable(element);
@@ -146,13 +154,37 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
 
     @Override
     public Iterator<T> iterator() {
-        return null;
+        return new Iterator<T>() {
+            LinkedCountableElement<T> cursor = iteratorListHead;
+            int numCursorIterated = 0;
+
+            @Override
+            public boolean hasNext() {
+                return cursor.getNext() != null || numCursorIterated < cursor.getCount();
+            }
+
+            @Override
+            public T next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException();
+                }
+
+                if (numCursorIterated < cursor.getCount()) {
+                    numCursorIterated++;
+                } else {
+                    cursor = cursor.getNext();
+                    numCursorIterated = 1;
+                }
+
+                return cursor.getValue();
+            }
+        };
     }
 
     @SuppressWarnings({"unchecked"})
     private void resize() {
         this.capacity *= 2;
-        CountableElement<T>[] newHashTable = (CountableElement<T>[]) new CountableElement[this.capacity];
+        LinkedCountableElement<T>[] newHashTable = (LinkedCountableElement<T>[]) new LinkedCountableElement[this.capacity];
 
         for (int i = 0; i < hashTable.length; i++) {
             if (this.hashTable[i] != null) {
@@ -172,13 +204,24 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
         return this.linearProbing(start, this.hashTable);
     }
 
-    private int linearProbing(int start, CountableElement<T>[] toProbe) {
+    private int linearProbing(int start, LinkedCountableElement<T>[] toProbe) {
         int i = start;
         while (toProbe[i] != null) {
             i++;
         }
 
         return i;
+    }
+
+    private void addToIteratorList(LinkedCountableElement<T> toAdd) {
+        if (this.iteratorListHead == null) {
+            this.iteratorListHead = toAdd;
+            this.iteratorListTail = toAdd;
+        } else if (this.iteratorListTail != null) {
+            this.iteratorListTail.setNext(toAdd);
+        }
+
+        this.iteratorListTail = toAdd;
     }
 
     private int getElementIndexInTable(T element) {
@@ -200,13 +243,17 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
         return i;
     }
 
-    private class CountableElement<T> {
-        T value;
-        int count;
+    private class LinkedCountableElement<T> {
+        private T value;
+        private int count;
 
-        CountableElement (T value) {
+        private LinkedCountableElement<T> next;
+
+        LinkedCountableElement(T value) {
             this.value = value;
             this.count = 1;
+
+            this.next = null;
         }
 
         void addToCount(int i) {
@@ -221,6 +268,12 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
             return this.value;
         }
 
+        LinkedCountableElement<T> getNext() {
+            return this.next;
+        }
 
+        void setNext(LinkedCountableElement<T> next) {
+            this.next = next;
+        }
     }
 }

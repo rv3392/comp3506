@@ -72,7 +72,7 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
     }
 
     private void addNewElement(T element, int count) {
-        int insertIndex = this.linearProbing(this.hash(element.hashCode()));
+        int insertIndex = this.linearProbing(this.compress(element.hashCode()));
 
         LinkedCountableElement<T> toAdd = new LinkedCountableElement<T>(element);
         toAdd.addToCount(count - 1);
@@ -184,7 +184,7 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
         // Copy over the elements of the hash table, but reapply the compression function.
         for (LinkedCountableElement<T> element : hashTable) {
             if (element != null) {
-                int elementIndex = this.linearProbing(this.hash(element.value.hashCode()), newHashTable);
+                int elementIndex = this.linearProbing(this.compress(element.value.hashCode()), newHashTable);
                 newHashTable[elementIndex] = element;
             }
         }
@@ -192,7 +192,7 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
         this.hashTable = newHashTable;
     }
 
-    private int hash(int key) {
+    private int compress(int key) {
         return key % this.capacity;
     }
 
@@ -276,7 +276,7 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
      * @return the index of the element if it is found, otherwise -1
      */
     private int getElementIndexInTable(T element) {
-        int i = this.hash(element.hashCode());
+        int i = this.compress(element.hashCode());
         if (this.hashTable[i] == null) {
             return -1;
         }

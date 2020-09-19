@@ -38,6 +38,7 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
 
         this.hashTable = (LinkedCountableElement<T>[]) new LinkedCountableElement[initialCapacity];
         this.iteratorListTail = null;
+        this.iteratorListHead = null;
     }
 
     @Override
@@ -110,6 +111,7 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
 
         this.hashTable[elementIndex].addToCount(-1);
         if (this.hashTable[elementIndex].getCount() == 0) {
+            this.removeFromIteratorList(this.hashTable[elementIndex]);
             this.hashTable[elementIndex] = null;
             this.numDistinctElements--;
         }
@@ -130,6 +132,7 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
 
         this.hashTable[elementIndex].addToCount(-count);
         if (this.hashTable[elementIndex].getCount() == 0) {
+            this.removeFromIteratorList(this.hashTable[elementIndex]);
             this.hashTable[elementIndex] = null;
             this.numDistinctElements--;
         }
@@ -219,9 +222,20 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
             this.iteratorListTail = toAdd;
         } else if (this.iteratorListTail != null) {
             this.iteratorListTail.setNext(toAdd);
+            toAdd.setPrevious(this.iteratorListTail);
         }
 
         this.iteratorListTail = toAdd;
+    }
+
+    private void removeFromIteratorList(LinkedCountableElement<T> toRemove) {
+        if (toRemove.previous != null) {
+            toRemove.previous.setNext(toRemove.next);
+        }
+
+        if (toRemove.next != null) {
+            toRemove.next.setPrevious(toRemove.previous);
+        }
     }
 
     private int getElementIndexInTable(T element) {
@@ -248,12 +262,14 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
         private int count;
 
         private LinkedCountableElement<T> next;
+        private LinkedCountableElement<T> previous;
 
         LinkedCountableElement(T value) {
             this.value = value;
             this.count = 1;
 
             this.next = null;
+            this.previous = null;
         }
 
         void addToCount(int i) {
@@ -274,6 +290,14 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
 
         void setNext(LinkedCountableElement<T> next) {
             this.next = next;
+        }
+
+        LinkedCountableElement<T> getPrevious() {
+            return this.previous;
+        }
+
+        void setPrevious(LinkedCountableElement<T> previous) {
+            this.previous = previous;
         }
     }
 }

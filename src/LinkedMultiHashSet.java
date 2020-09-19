@@ -22,12 +22,21 @@ import java.util.NoSuchElementException;
  */
 public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
 
+    /* An array storing all of the elements of the underlying hash table */
     private LinkedCountableElement<T>[] hashTable;
+
+    /* The linked list used to store LinkedCountableElements for the iterator
+       iteratorListHead is the start of this linked list and used as the start of the iterator
+       iteratorListTail is the end of the linked list and where new elements are added
+     */
     private LinkedCountableElement<T> iteratorListHead;
     private LinkedCountableElement<T> iteratorListTail;
 
+    /* Number of total elements - including duplicates */
     private int numElements;
+    /* Number of distinct elements - not including duplicates */
     private int numDistinctElements;
+    /* Maximum number of total elements that can be stored - this counts duplicates */
     private int capacity;
 
     @SuppressWarnings({"unchecked"})
@@ -53,18 +62,25 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
         }
 
         if (!this.contains(element)) {
-            int insertIndex = this.linearProbing(this.hash(element.hashCode()));
-            LinkedCountableElement<T> toAdd = new LinkedCountableElement<T>(element);
-            toAdd.addToCount(count - 1);
-            this.hashTable[insertIndex] = toAdd;
-            this.addToIteratorList(toAdd);
-            this.numDistinctElements++;
+            this.addNewElement(element, count);
         } else {
             int index = this.getElementIndexInTable(element);
             this.hashTable[index].addToCount(count);
         }
 
         this.numElements += count;
+    }
+
+    private void addNewElement(T element, int count) {
+        int insertIndex = this.linearProbing(this.hash(element.hashCode()));
+
+        LinkedCountableElement<T> toAdd = new LinkedCountableElement<T>(element);
+        toAdd.addToCount(count - 1);
+        this.hashTable[insertIndex] = toAdd;
+
+        this.addToIteratorList(toAdd);
+
+        this.numDistinctElements++;
     }
 
     @Override
@@ -156,15 +172,20 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
         };
     }
 
+    /**
+     * Resizes the internal hash table of LinkedCountableElements doubling the capacity.
+     */
     @SuppressWarnings({"unchecked"})
     private void resize() {
+        // Double hash table size and create a new array with this new size.
         this.capacity *= 2;
         LinkedCountableElement<T>[] newHashTable = (LinkedCountableElement<T>[]) new LinkedCountableElement[this.capacity];
 
-        for (int i = 0; i < hashTable.length; i++) {
-            if (this.hashTable[i] != null) {
-                int elementIndex = this.linearProbing(this.hash(this.hashTable[i].value.hashCode()), newHashTable);
-                newHashTable[elementIndex] = this.hashTable[i];
+        // Copy over the elements of the hash table, but reapply the compression function.
+        for (LinkedCountableElement<T> element : hashTable) {
+            if (element != null) {
+                int elementIndex = this.linearProbing(this.hash(element.value.hashCode()), newHashTable);
+                newHashTable[elementIndex] = element;
             }
         }
 
@@ -175,10 +196,25 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
         return key % this.capacity;
     }
 
+    /**
+     * Applies linear probing to the stored internal representation of the hash
+     * and gets the first empty position after "start".
+     *
+     * @param start index to start linear probing from
+     * @return index of the first empty position after "start" in the hash table
+     */
     private int linearProbing(int start) {
         return this.linearProbing(start, this.hashTable);
     }
 
+    /**
+     * Applies linear probing to the given hash table array and gets the first
+     * empty position after "start".
+     *
+     * @param start index to start linear probing from
+     * @param toProbe the array to linearly probe
+     * @return index of the first empty position after "start" in the given array
+     */
     private int linearProbing(int start, LinkedCountableElement<T>[] toProbe) {
         int i = start;
         while (toProbe[i] != null) {
@@ -188,6 +224,17 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
         return i;
     }
 
+    /**
+     * Add a new element to the iterator list.
+     *
+     * This adds a new element to the end of the iterator list such that when
+     * this.iterator() is called the element that has been added will appear
+     * after all other elements already in the list. The element to add
+     * should also be simultaneously added to the internal representation
+     * of the set.
+     *
+     * @param toAdd element to be added to the linked list for the iterator
+     */
     private void addToIteratorList(LinkedCountableElement<T> toAdd) {
         if (this.iteratorListHead == null) {
             this.iteratorListHead = toAdd;
@@ -200,7 +247,17 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
         this.iteratorListTail = toAdd;
     }
 
+    /**
+     * Removes the given element from the iterator linked list.
+     *
+     * This removes the given element from the list. The given element must be
+     * in the list already and thus should have either a "next" or "previous"
+     * element. In the case that it has neither then nothing really happens.
+     *
+     * @param toRemove element to be removed from the list for the iterator.
+     */
     private void removeFromIteratorList(LinkedCountableElement<T> toRemove) {
+        // TODO: Does this work with a single element?
         if (toRemove.previous != null) {
             toRemove.previous.setNext(toRemove.next);
         }
@@ -210,6 +267,14 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
         }
     }
 
+    /**
+     * Gets the index of the LinkedCountableElement container with the given
+     * element. If the given element is not within any of the containers in
+     * the hash table, then -1 is returned.
+     *
+     * @param element the element to search for
+     * @return the index of the element if it is found, otherwise -1
+     */
     private int getElementIndexInTable(T element) {
         int i = this.hash(element.hashCode());
         if (this.hashTable[i] == null) {

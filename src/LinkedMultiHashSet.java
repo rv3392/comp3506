@@ -43,23 +43,7 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
 
     @Override
     public void add(T element) {
-        if (this.numElements + 1 > this.capacity) {
-            this.resize();
-        }
-
-        if (!this.contains(element)) {
-            int insertIndex = this.linearProbing(this.hash(element.hashCode()));
-            // TODO: This is a bit messy
-            LinkedCountableElement<T> toAdd = new LinkedCountableElement<T>(element);
-            this.hashTable[insertIndex] = toAdd;
-            this.addToIteratorList(toAdd);
-            this.numDistinctElements++;
-        } else {
-            int index = this.getElementIndexInTable(element);
-            this.hashTable[index].addToCount(1);
-        }
-
-        this.numElements++;
+        this.add(element, 1);
     }
 
     @Override
@@ -104,19 +88,7 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
 
     @Override
     public void remove(T element) throws NoSuchElementException {
-        int elementIndex = this.getElementIndexInTable(element);
-        if (elementIndex == -1) {
-            throw new NoSuchElementException();
-        }
-
-        this.hashTable[elementIndex].addToCount(-1);
-        if (this.hashTable[elementIndex].getCount() == 0) {
-            this.removeFromIteratorList(this.hashTable[elementIndex]);
-            this.hashTable[elementIndex] = null;
-            this.numDistinctElements--;
-        }
-
-        this.numElements--;
+        this.remove(element, 1);
     }
 
     @Override

@@ -39,7 +39,7 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
 
     @Override
     public void add(T element) {
-        if (this.numElements >= this.capacity) {
+        if (this.numElements + 1 > this.capacity) {
             this.resize();
         }
 
@@ -57,7 +57,7 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
 
     @Override
     public void add(T element, int count) {
-        if (this.numElements >= this.capacity) {
+        while (this.numElements + count > this.capacity) {
             this.resize();
         }
 
@@ -149,8 +149,19 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
         return null;
     }
 
+    @SuppressWarnings({"unchecked"})
     private void resize() {
-        //TODO: Implement this
+        this.capacity *= 2;
+        CountableElement<T>[] newHashTable = (CountableElement<T>[]) new CountableElement[this.capacity];
+
+        for (int i = 0; i < hashTable.length; i++) {
+            if (this.hashTable[i] != null) {
+                int elementIndex = this.linearProbing(this.hash(this.hashTable[i].value.hashCode()), newHashTable);
+                newHashTable[elementIndex] = this.hashTable[i];
+            }
+        }
+
+        this.hashTable = newHashTable;
     }
 
     private int hash(int key) {
@@ -158,8 +169,12 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
     }
 
     private int linearProbing(int start) {
+        return this.linearProbing(start, this.hashTable);
+    }
+
+    private int linearProbing(int start, CountableElement<T>[] toProbe) {
         int i = start;
-        while (this.hashTable[i] != null) {
+        while (toProbe[i] != null) {
             i++;
         }
 

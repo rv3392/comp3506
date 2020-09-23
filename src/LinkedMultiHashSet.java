@@ -57,10 +57,6 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
 
     @Override
     public void add(T element, int count) {
-        while (this.numElements + count > this.capacity) {
-            this.resize();
-        }
-
         if (!this.contains(element)) {
             this.addNewElement(element, count);
         } else {
@@ -69,6 +65,9 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
         }
 
         this.numElements += count;
+        if (this.numDistinctElements >= this.capacity) {
+            this.resize();
+        }
     }
 
     private void addNewElement(T element, int count) {
@@ -286,7 +285,7 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
             if (this.hashTable[i] == null) {
                 return -1;
             }
-            if (i > this.numElements - 1) {
+            if (i >= this.capacity) {
                 return -1;
             }
         }

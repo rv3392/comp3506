@@ -5,6 +5,13 @@ public class QuaternaryHeapsort {
     /**
      * Sorts the input array, in-place, using a quaternary heap sort.
      *
+     * This method runs in O(nlogn) time complexity in the worst case as
+     * downheap is called twice for each element in the downheap and swap
+     * is called once for each element.
+     *
+     * The space complexity is O(1) as the sort is performed in-place and
+     * no new memory needs to be allocated for this to occur.
+     *
      * @param input to be sorted (modified in place)
      */
     public static <T extends Comparable<T>> void quaternaryHeapsort(T[] input) {
@@ -32,6 +39,15 @@ public class QuaternaryHeapsort {
      *
      * You should only consider elements in the input array from index 0 to index (size - 1)
      * as part of the heap (i.e. pretend the input array stops after the inputted size).
+     *
+     * The worst case time complexity of this method is O(logn) as the number of swaps and
+     * comparisons performed is dependent on the height = h of the tree and also the node
+     * chosen to start the downheap at. As a result of this, in the worst case there would
+     * be h iterations performed and the height of a quaternary tree is log4(n) where n
+     * is the number of elements in the tree.
+     *
+     * The space complexity is O(1) as no new memory is allocated in this method - there are
+     * only transformations to existing memory.
      *
      * @param input array representing a quaternary max heap.
      * @param start position in the array to start the downheap from.
@@ -63,6 +79,9 @@ public class QuaternaryHeapsort {
      * Get the index of the first child of the node at the provided index and
      * depth in the quaternary heap.
      *
+     * The time complexity of this method is O(1) as the number of calculations
+     * performed is always the same. The memory complexity is also O(1).
+     *
      * @param index Index of the node for which to find the first child
      * @param depth Depth at which the node is located
      * @return The index of the first child of the given node
@@ -81,6 +100,11 @@ public class QuaternaryHeapsort {
      * The scanning starts at the given firstChild and continues until all
      * of the children of the node have been compared. This may be before
      * 4 comparisons are made as a node could have less than 4 children.
+     *
+     * This method has a worst case time complexity of O(1) as any parent can have
+     * at most 4 children. This means that in the worst case only 4 comparisons are
+     * made, which is not dependent on the size of any of the inputs. The memory
+     * complexity is also O(1).
      *
      * @param input Array representing the quaternary heap
      * @param firstChild The index of the first child of the node
@@ -112,6 +136,10 @@ public class QuaternaryHeapsort {
     /**
      * Swap the element in index1 with the element in index2 within the given
      * array input.
+     *
+     * The time complexity of this method is O(1) as only one swap is performed at a time
+     * and so there is no dependence on the size of any of the inputs. The space complexity
+     * is also O(1).
      *
      * @param input Array to perform the swap on
      * @param index1 First index to swap

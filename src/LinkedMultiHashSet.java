@@ -62,7 +62,7 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
      *
      * The memory complexity is O(1) as there is new memory allocated,
      * however it is not proportional to the size of the input but is
-     * instead constant. TODO: Double check
+     * instead constant.
      *
      * @param element to add
      */
@@ -72,7 +72,7 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
     }
 
     /**
-     *
+     * O(n) time complexity and O(1) space complexity as mentioned above.
      * @param element to add
      * @param count
      */

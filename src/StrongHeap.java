@@ -12,6 +12,13 @@ public class StrongHeap {
      *  - a complete binary tree, AND
      *  - its values satisfy the strong heap property.
      *
+     * This method has a worst case time complexity of O(n). This occurs when the tree given
+     * is a strong heap as all nodes need to be checked to make sure that they all follow the
+     * strong heap conditions. As stated in the javadocs of the private helper methods, they
+     * are all O(n) and so a single call of all of these helpers means that this method is also
+     * O(n). The memory complexity of this method is O(1) as no new memory is required at any
+     * point.
+     *
      * @param root root of a binary tree, cannot be null.
      * @return true if the tree is a strong heap, otherwise false.
      */
@@ -26,6 +33,9 @@ public class StrongHeap {
 
     /**
      * Checks if the subtree formed by the given root is a strong heap.
+     *
+     * Worst case runtime is O(n) as all nodes in the heap need to be checked if the subtree
+     * is a strong heap.
      *
      * @param subtreeRoot Root of the subtree being checked
      * @param currentDepth Depth from the root of the main tree of this subtree
@@ -60,12 +70,15 @@ public class StrongHeap {
                     parentValue) && isSubtreeStrongHeap(subtreeRoot.getRight(), currentDepth + 1,
                     subtreeRoot.getValue(), parentValue);
         }
-
     }
 
     /**
      * Gets what should be the longest root to leaf path if the BinaryTree defined by the given root is complete. For
      * a complete binary tree this should be the path from the root to the left-most node.
+     *
+     * This has a worst case time complexity of O(n) as all of the nodes in the left-most root to leaf path
+     * need to be checked to find the depth. This is dependent on the depth of the tree however in the worst
+     * case where there's only one root to leaf path the depth is the same as the number of nodes in the tree.
      *
      * @param root Starting node (root) of the BinaryTree whose max depth is being found
      * @return Longest root to leaf path of the BinaryTree
@@ -87,6 +100,9 @@ public class StrongHeap {
      * Given a starting node, it recursively calls itself until a leaf node is reached. Upon reaching the leaf node,
      * the method checks if the BinaryTree violates any of the requirements of a complete binary tree - that all
      * nodes are on the left and that all levels apart from the last is completely filled.
+     *
+     * This has a worst case time complexity of O(n) in the case that the tree is complete and all root to leaf
+     * paths need to be checked.
      *
      * @param node The node in the binary tree to start from
      * @param maxDepth The maximum depth of the binary tree - i.e. longest root to leaf path

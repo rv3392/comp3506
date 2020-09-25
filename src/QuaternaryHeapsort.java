@@ -17,7 +17,7 @@ public class QuaternaryHeapsort {
      * @param input to be sorted (modified in place)
      */
     public static <T extends Comparable<T>> void quaternaryHeapsort(T[] input) {
-        // Make sure the root of the heap is the largest element
+        // Build the heap using a bottom-up approach
         for (int i = input.length - 1; i >= 0; i--) {
             quaternaryDownheap(input, i, input.length);
         }

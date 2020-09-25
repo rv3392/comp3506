@@ -22,6 +22,13 @@ import java.util.NoSuchElementException;
  */
 public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
 
+    /* Used to represent cases where an index is needed however a particular element is not in the hash table. */
+    private static final int NOT_IN_TABLE = -1;
+    /* Used to represent cases where an index is required for adding a new element to the hash set but there
+       is no space left.
+    */
+    private static final int NO_SPACE = -1;
+
     /* An array storing all of the elements of the underlying hash table */
     private LinkedCountableElement<T>[] hashTable;
 
@@ -102,6 +109,10 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
      */
     private void addNewElement(T element, int count) {
         int insertIndex = this.linearProbing(this.compress(element.hashCode()));
+        // This should never happen given that resizing works correctly.
+        if (insertIndex == NO_SPACE) {
+            return;
+        }
 
         LinkedCountableElement<T> toAdd = new LinkedCountableElement<T>(element);
         toAdd.addToCount(count - 1);
@@ -125,7 +136,7 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
      */
     @Override
     public boolean contains(T element) {
-        if (this.getElementIndexInTable(element) == -1) {
+        if (this.getElementIndexInTable(element) == NOT_IN_TABLE) {
             return false;
         }
 
@@ -142,7 +153,7 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
     @Override
     public int count(T element) {
         int elementIndex = this.getElementIndexInTable(element);
-        if (elementIndex == -1) {
+        if (elementIndex == NOT_IN_TABLE) {
             return 0;
         }
 
@@ -174,7 +185,7 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
     @Override
     public void remove(T element, int count) throws NoSuchElementException {
         int elementIndex = this.getElementIndexInTable(element);
-        if (elementIndex == -1) {
+        if (elementIndex == NOT_IN_TABLE) {
             throw new NoSuchElementException();
         }
 
@@ -345,7 +356,7 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
             if (i >= this.capacity) {
                 i = 0;
             } else if (i == start) {
-                return -1;
+                return NO_SPACE;
             }
         }
 
@@ -389,8 +400,6 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
      * @param toRemove element to be removed from the list for the iterator.
      */
     private void removeFromIteratorList(LinkedCountableElement<T> toRemove) {
-        // TODO: Does this work with a single element?
-
         if (toRemove.getNext() == null && toRemove.getPrevious() == null) {
             this.iteratorListHead = null;
             this.iteratorListTail = null;
@@ -424,7 +433,7 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
         int start = this.compress(element.hashCode());
         int i = start;
         if (this.hashTable[i] == null) {
-            return -1;
+            return NOT_IN_TABLE;
         }
 
         while (!this.hashTable[i].getValue().equals(element)) {
@@ -434,15 +443,15 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
             }
             // If the index reaches back to the starting index then element is not in the hash table.
             if (i == start) {
-                return -1;
+                return NOT_IN_TABLE;
             }
             if (this.hashTable[i] == null) {
-                return -1;
+                return NOT_IN_TABLE;
             }
         }
 
         if (this.hashTable[i].getCount() == 0) {
-            return -1;
+            return NOT_IN_TABLE;
         }
 
         return i;

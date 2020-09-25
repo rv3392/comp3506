@@ -85,13 +85,13 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
      */
     @Override
     public void add(T element, int count) {
-        if (!this.contains(element)) {
+        int elementIndex = this.getElementIndexInTable(element);
+        if (elementIndex == NOT_IN_TABLE) {
             // If the element is not in the hash table then create it and add it.
             this.addNewElement(element, count);
         } else {
             // Otherwise find it in the hash table and increment its count.
-            int index = this.getElementIndexInTable(element);
-            this.hashTable[index].addToCount(count);
+            this.hashTable[elementIndex].addToCount(count);
         }
 
         this.numElements += count;

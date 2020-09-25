@@ -2,6 +2,8 @@ import java.lang.Math;
 
 public class QuaternaryHeapsort {
 
+    private static final int HAS_NO_CHILDREN = -1;
+
     /**
      * Sorts the input array, in-place, using a quaternary heap sort.
      *
@@ -56,17 +58,20 @@ public class QuaternaryHeapsort {
     public static <T extends Comparable<T>> void quaternaryDownheap(T[] input, int start, int size) {
         int depth = getDepth(start);
         int i = start;
+        // This is the index of the child that should be swapped in a downheap.
         int largestChildIndex = getLargestChildIndex(input, getFirstChildIndex(i, depth++), size);
         while (i < size && largestChildIndex != -1 && input[largestChildIndex].compareTo(input[i]) > 0) {
             swap(input, i, largestChildIndex);
-            i = largestChildIndex;
+            i = largestChildIndex; // Move index to where the parent was swapped to.
             largestChildIndex = getLargestChildIndex(input, getFirstChildIndex(i, depth++), size);
         }
     }
 
     /**
      * Use the general formula to calculate the depth of a tree to calculate
-     * the depth of a particular index within the tree.
+     * the depth of a particular index within the tree. This is kind of a weird
+     * formula and I think there are better ways to do this, but it works so it's
+     * fine.
      *
      * @param index Node to calculate the depth of
      * @return Depth of the given index in the quaternary heap
@@ -77,7 +82,7 @@ public class QuaternaryHeapsort {
 
     /**
      * Get the index of the first child of the node at the provided index and
-     * depth in the quaternary heap.
+     * depth in the quaternary heap. Again, a weird formula but it works.
      *
      * The time complexity of this method is O(1) as the number of calculations
      * performed is always the same. The memory complexity is also O(1).
@@ -109,11 +114,13 @@ public class QuaternaryHeapsort {
      * @param input Array representing the quaternary heap
      * @param firstChild The index of the first child of the node
      *
-     * @return The index of the largest child of the firstChild's parent
+     * @return The index of the largest child of the firstChild's parent or
+     *      HAS_NO_CHILDREN if the node doesn't have any children.
      */
     private static <T extends Comparable<T>> int getLargestChildIndex(T[] input, int firstChild, int size) {
-        if (firstChild > size - 1) {
-            return -1;
+        // If the first child is outside the bounds of the tree, i.e. it doesn't exist and the parent is a leaf node.
+        if (firstChild >= size) {
+            return HAS_NO_CHILDREN;
         }
 
         int maxIndex = size - firstChild;
@@ -121,6 +128,7 @@ public class QuaternaryHeapsort {
             maxIndex = 4;
         }
 
+        // Scan all of the children of the first child's parent and see which one is the largest.
         T largestChild = input[firstChild];
         int largestChildIndex = firstChild;
         for (int i = 1; i < maxIndex; i++) {

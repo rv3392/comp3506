@@ -185,7 +185,6 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
         this.hashTable[elementIndex].addToCount(-count);
         if (this.hashTable[elementIndex].getCount() == 0) {
             this.removeFromIteratorList(this.hashTable[elementIndex]);
-            this.hashTable[elementIndex] = null;
             this.numDistinctElements--;
         }
 
@@ -341,7 +340,7 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
      */
     private int linearProbing(int start, LinkedCountableElement<T>[] toProbe) {
         int i = start;
-        while (toProbe[i] != null) {
+        while (toProbe[i] != null && toProbe[i].getCount() != 0) {
             i++;
             if (i >= this.capacity) {
                 i = 0;
@@ -391,12 +390,19 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
      */
     private void removeFromIteratorList(LinkedCountableElement<T> toRemove) {
         // TODO: Does this work with a single element?
-        if (toRemove.previous != null) {
-            toRemove.previous.setNext(toRemove.next);
-        }
 
-        if (toRemove.next != null) {
-            toRemove.next.setPrevious(toRemove.previous);
+        if (toRemove.getNext() == null && toRemove.getPrevious() == null) {
+            this.iteratorListHead = null;
+            this.iteratorListTail = null;
+        } else if (toRemove.getNext() == null) {
+            toRemove.getPrevious().setNext(toRemove.getNext());
+            this.iteratorListTail = toRemove.getPrevious();
+        } else if (toRemove.getPrevious() == null) {
+            toRemove.getNext().setPrevious(toRemove.getPrevious());
+            this.iteratorListHead = toRemove.getNext();
+        } else {
+            toRemove.getPrevious().setNext(toRemove.getNext());
+            toRemove.getNext().setPrevious(toRemove.getPrevious());
         }
     }
 
@@ -426,12 +432,17 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
             if (i >= this.capacity) {
                 i = 0; // Wrap around to the start of the hash table
             }
+            // If the index reaches back to the starting index then element is not in the hash table.
             if (i == start) {
                 return -1;
             }
             if (this.hashTable[i] == null) {
                 return -1;
             }
+        }
+
+        if (this.hashTable[i].getCount() == 0) {
+            return -1;
         }
 
         return i;

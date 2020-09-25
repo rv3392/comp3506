@@ -343,6 +343,11 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
         int i = start;
         while (toProbe[i] != null) {
             i++;
+            if (i >= this.capacity) {
+                i = 0;
+            } else if (i == start) {
+                return -1;
+            }
         }
 
         return i;
@@ -410,17 +415,21 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
      * @return the index of the element if it is found, otherwise -1
      */
     private int getElementIndexInTable(T element) {
-        int i = this.compress(element.hashCode());
+        int start = this.compress(element.hashCode());
+        int i = start;
         if (this.hashTable[i] == null) {
             return -1;
         }
 
         while (!this.hashTable[i].getValue().equals(element)) {
             i++;
-            if (this.hashTable[i] == null) {
+            if (i >= this.capacity) {
+                i = 0; // Wrap around to the start of the hash table
+            }
+            if (i == start) {
                 return -1;
             }
-            if (i >= this.capacity) {
+            if (this.hashTable[i] == null) {
                 return -1;
             }
         }

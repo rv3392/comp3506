@@ -79,15 +79,17 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
     }
 
     /**
-     * O(n) time complexity and O(1) space complexity as mentioned above.
+     * O(n) worst case time complexity and O(1) space complexity as mentioned above.
      * @param element to add
      * @param count
      */
     @Override
     public void add(T element, int count) {
         if (!this.contains(element)) {
+            // If the element is not in the hash table then create it and add it.
             this.addNewElement(element, count);
         } else {
+            // Otherwise find it in the hash table and increment its count.
             int index = this.getElementIndexInTable(element);
             this.hashTable[index].addToCount(count);
         }
@@ -115,9 +117,8 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
         }
 
         LinkedCountableElement<T> toAdd = new LinkedCountableElement<T>(element);
-        toAdd.addToCount(count - 1);
+        toAdd.addToCount(count - 1); // count - 1 since LinkedCountableElement initialises to count = 1.
         this.hashTable[insertIndex] = toAdd;
-
         this.addToIteratorList(toAdd);
 
         this.numDistinctElements++;
@@ -193,6 +194,7 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
             throw new NoSuchElementException();
         }
 
+        // Remove the given count of this element and if there are 0 remove from the iterator list as well.
         this.hashTable[elementIndex].addToCount(-count);
         if (this.hashTable[elementIndex].getCount() == 0) {
             this.removeFromIteratorList(this.hashTable[elementIndex]);
@@ -294,9 +296,10 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
     private void resize() {
         // Double hash table size and create a new array with this new size.
         this.capacity *= 2;
-        LinkedCountableElement<T>[] newHashTable = (LinkedCountableElement<T>[]) new LinkedCountableElement[this.capacity];
+        LinkedCountableElement<T>[] newHashTable =
+                (LinkedCountableElement<T>[]) new LinkedCountableElement[this.capacity];
 
-        // Copy over the elements of the hash table, but reapply the compression function.
+        // Copy over the elements of the hash table, but reapply the compression function based on the new capacity.
         for (LinkedCountableElement<T> element : hashTable) {
             if (element != null) {
                 int elementIndex = this.linearProbing(this.compress(element.value.hashCode()), newHashTable);
@@ -309,6 +312,10 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
 
     /**
      * Applies the compression function on the given hash key.
+     *
+     * The compression function used for this hash table is a simple modulo
+     * of the hashcode by the total number of elements that can fit in this
+     * set.
      *
      * This method has a worst case time and space complexity of O(1).
      *
@@ -325,7 +332,7 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
      * and gets the first empty position after "start".
      *
      * The time complexity of this method is O(n) as it calls the overloaded
-     * linearProbing method. The space complexity is O(1).
+     * linearProbing method below. The space complexity is O(1).
      *
      * @param start index to start linear probing from
      * @return index of the first empty position after "start" in the hash table
@@ -336,7 +343,7 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
 
     /**
      * Applies linear probing to the given hash table array and gets the first
-     * empty position after "start".
+     * empty position after "start". This could be the "start" index.
      *
      * The worst case time complexity of this method is O(n). This can occur if
      * there were many elements added such that they had a hash collision resulting
@@ -351,11 +358,14 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
      */
     private int linearProbing(int start, LinkedCountableElement<T>[] toProbe) {
         int i = start;
+        // Find the first empty space or placeholder space in the hash table
         while (toProbe[i] != null && toProbe[i].getCount() != 0) {
             i++;
             if (i >= this.capacity) {
                 i = 0;
             } else if (i == start) {
+                // If the scan has wrapped around to start again then there is no space in the table.
+                // This shouldn't ever happen given the table is resized correctly.
                 return NO_SPACE;
             }
         }
@@ -401,15 +411,23 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
      */
     private void removeFromIteratorList(LinkedCountableElement<T> toRemove) {
         if (toRemove.getNext() == null && toRemove.getPrevious() == null) {
+            // If both are null then "toRemove" is the only element left in the set so there are no elements in the
+            // iterator.
             this.iteratorListHead = null;
             this.iteratorListTail = null;
         } else if (toRemove.getNext() == null) {
+            // If only the next element is null, then this is the last element and there have been no elements added
+            // after the "toRemove" element.
             toRemove.getPrevious().setNext(toRemove.getNext());
             this.iteratorListTail = toRemove.getPrevious();
         } else if (toRemove.getPrevious() == null) {
+            // If only the previous element is null, then this is the first element and there were no elements added
+            // before the "toRemove" element.
             toRemove.getNext().setPrevious(toRemove.getPrevious());
             this.iteratorListHead = toRemove.getNext();
         } else {
+            // If neither previous nor next are null then there were elements added before and after this element,
+            // so delete like a normal linked list.
             toRemove.getPrevious().setNext(toRemove.getNext());
             toRemove.getNext().setPrevious(toRemove.getPrevious());
         }
@@ -418,7 +436,7 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
     /**
      * Gets the index of the LinkedCountableElement container with the given
      * element. If the given element is not within any of the containers in
-     * the hash table, then -1 is returned.
+     * the hash table, then NOT_IN_TABLE (== -1) is returned.
      *
      * This method has a time complexity of O(n) in the worst case scenario as
      * a hash collision being resolved with linear probing means that the element
@@ -436,12 +454,14 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
             return NOT_IN_TABLE;
         }
 
+        // Scan the hash table for the given element after the index it was expected to be at. This is used to find an
+        // element that may have been placed at a later index than its compressed hash code due to hash collision.
         while (!this.hashTable[i].getValue().equals(element)) {
             i++;
             if (i >= this.capacity) {
                 i = 0; // Wrap around to the start of the hash table
             }
-            // If the index reaches back to the starting index then element is not in the hash table.
+            // If the index reaches back to the starting index then the element is not in the hash table.
             if (i == start) {
                 return NOT_IN_TABLE;
             }
@@ -450,6 +470,8 @@ public class LinkedMultiHashSet<T> implements MultiSet<T>, Iterable<T> {
             }
         }
 
+        // If the count of the element is 0, then that means that it has been removed but a placeholder is still in the
+        // table to maintain the "block" of elements with the same compressed hash code.
         if (this.hashTable[i].getCount() == 0) {
             return NOT_IN_TABLE;
         }

@@ -33,22 +33,24 @@ public class ErdosNumbers {
 
         for (int i = 0; i < authorNames.length; i++) {
             String authorName = authorNames[i];
+            this.parseAuthor(paperName, authorName);
             for (int j = i + 1; j < authorNames.length; j++) {
                 String otherAuthorName = authorNames[j];
-                this.parseAuthorPair(paperName, authorName, otherAuthorName);
+                this.parseAuthor(paperName, otherAuthorName);
+                this.parseCollaboration(paperName, authorName, otherAuthorName);
             }
 
         }
     }
 
-    private void parseAuthorPair(String paperName, String authorName, String otherAuthorName) {
+    private void parseAuthor(String paperName, String authorName) {
         this.authors.putIfAbsent(authorName, new Author(authorName));
-        Author first = this.authors.get(authorName);
-        first.addPaper(paperName);
+        this.authors.get(authorName).addPaper(paperName);
+    }
 
-        this.authors.putIfAbsent(otherAuthorName, new Author(otherAuthorName));
+    private void parseCollaboration(String paperName, String authorName, String otherAuthorName) {
+        Author first = this.authors.get(authorName);
         Author second = this.authors.get(otherAuthorName);
-        second.addPaper(paperName);
 
         if (!first.hasCollaboratedWith(second)) {
             Collaboration newAuthorCollaboration = new Collaboration(first, second);
@@ -154,23 +156,20 @@ public class ErdosNumbers {
      */
     public boolean isErdosConnectedToAll() {
         Set<String> visited = new HashSet<String>();
-        //visited.add(ERDOS);
+
         // Use a DFS-style traversal to iterate over all of the nodes connected to Erdos
         // There is no search condition and so the DFS continues until all connected nodes have been traversed.
         Stack<String> frontier = new Stack<String>();
         frontier.add(ERDOS);
-        //String nextAuthor = ERDOS;
+
         while (frontier.size() > 0) {
             String nextAuthor = frontier.pop();
             if (!visited.contains(nextAuthor)) {
                 frontier.addAll(this.getCollaborators(nextAuthor));
                 visited.add(nextAuthor);
-                System.out.println(nextAuthor);
+
             }
         }
-
-        System.out.println(visited.size());
-        System.out.println(authors.size());
 
         // This means the number of nodes visited is the same as the number of authors and thus all authors are
         // connected to Erdos.

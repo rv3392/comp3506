@@ -153,7 +153,30 @@ public class ErdosNumbers {
      * @return the connectivity of Erdos to all other authors.
      */
     public boolean isErdosConnectedToAll() {
-        // TODO: implement this
+        Set<String> visited = new HashSet<String>();
+        //visited.add(ERDOS);
+        // Use a DFS-style traversal to iterate over all of the nodes connected to Erdos
+        // There is no search condition and so the DFS continues until all connected nodes have been traversed.
+        Stack<String> frontier = new Stack<String>();
+        frontier.add(ERDOS);
+        //String nextAuthor = ERDOS;
+        while (frontier.size() > 0) {
+            String nextAuthor = frontier.pop();
+            if (!visited.contains(nextAuthor)) {
+                frontier.addAll(this.getCollaborators(nextAuthor));
+                visited.add(nextAuthor);
+                System.out.println(nextAuthor);
+            }
+        }
+
+        System.out.println(visited.size());
+        System.out.println(authors.size());
+
+        // This means the number of nodes visited is the same as the number of authors and thus all authors are
+        // connected to Erdos.
+        if (visited.size() == authors.size()) {
+            return true;
+        }
         
         return false;
     }

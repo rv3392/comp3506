@@ -1,11 +1,12 @@
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class ErdosNumbers {
     /**
      * String representing Paul Erdos's name to check against
      */
     public static final String ERDOS = "Paul Erdös";
+
+    private HashMap<String, Author> authors = new HashMap<String, Author>();
 
     /**
      * Initialises the class with a list of papers and authors.
@@ -20,7 +21,106 @@ public class ErdosNumbers {
      * @param papers List of papers and their authors
      */
     public ErdosNumbers(List<String> papers) {
-        // TODO: implement this
+        for (String paper : papers) {
+            this.parsePaper(paper);
+        }
+    }
+
+    private void parsePaper(String paper) {
+        String[] details = paper.split(":");
+        String paperName = details[0];
+        String[] authorNames = details[1].split("\\|");
+
+        for (int i = 0; i < authorNames.length; i++) {
+            String authorName = authorNames[i];
+            for (int j = i + 1; j < authorNames.length; j++) {
+                String otherAuthorName = authorNames[j];
+                this.parseAuthorPair(paperName, authorName, otherAuthorName);
+            }
+
+        }
+    }
+
+    private void parseAuthorPair(String paperName, String authorName, String otherAuthorName) {
+        this.authors.putIfAbsent(authorName, new Author(authorName));
+        Author first = this.authors.get(authorName);
+        first.addPaper(paperName);
+
+        this.authors.putIfAbsent(otherAuthorName, new Author(otherAuthorName));
+        Author second = this.authors.get(otherAuthorName);
+        second.addPaper(paperName);
+
+        if (!first.hasCollaboratedWith(second)) {
+            Collaboration newAuthorCollaboration = new Collaboration(first, second);
+            first.addCollaboration(second, newAuthorCollaboration);
+            second.addCollaboration(first, newAuthorCollaboration);
+        }
+
+        first.getCollaboration(second).incrementPaperCount();
+    }
+
+    private class Author {
+        private String name;
+        private Map<String, Collaboration> collaborations;
+        private Set<String> papers;
+
+        private Author(String name) {
+            this.name = name;
+            this.collaborations = new HashMap<String, Collaboration>();
+            this.papers = new HashSet<String>();
+        }
+
+        private String getName() {
+            return this.name;
+        }
+
+        private void addCollaboration(Author collaborator, Collaboration newCollaboration) {
+            this.collaborations.put(collaborator.getName(), newCollaboration);
+        }
+
+        private boolean hasCollaboratedWith(Author collaborater) {
+            if (collaborations.containsKey(collaborater.getName())) {
+                return true;
+            }
+
+            return false;
+        }
+
+        private Collaboration getCollaboration(Author collaborator) {
+            return collaborations.get(collaborator.getName());
+        }
+
+        private void addPaper(String paper) {
+            this.papers.add(paper);
+        }
+
+        private Set<String> getPapers() {
+            return this.papers;
+        }
+
+        private Set<String> getCollaborators() {
+            return this.collaborations.keySet();
+        }
+    }
+
+    private class Collaboration {
+        private Author author1;
+        private Author author2;
+        private int numPapersTogether;
+
+        private Collaboration(Author author1, Author author2) {
+            this.numPapersTogether = 0;
+            this.author1 = author1;
+            this.author2 = author2;
+        }
+
+        private void incrementPaperCount() {
+            this.numPapersTogether++;
+        }
+
+        private int getCollaborationCount() {
+            return this.numPapersTogether;
+        }
     }
     
     /**
@@ -31,9 +131,7 @@ public class ErdosNumbers {
      * @return the unique set of papers this author has written.
      */
     public Set<String> getPapers(String author) {
-        // TODO: implement this
-        
-        return Set.of();
+        return this.authors.get(author).getPapers();
     }
 
     /**
@@ -43,9 +141,7 @@ public class ErdosNumbers {
      * @return the unique co-authors the author has written with.
      */
     public Set<String> getCollaborators(String author) {
-        // TODO: implement this
-        
-        return Set.of();
+        return this.authors.get(author).getCollaborators();
     }
 
     /**

@@ -6,7 +6,14 @@ public class ErdosNumbers {
      */
     public static final String ERDOS = "Paul Erdös";
 
-    private HashMap<String, Author> authors = new HashMap<String, Author>();
+    /**
+     * A mapping of author names to their respective Author instance.
+     */
+    private Map<String, Author> authors = new HashMap<>();
+    /**
+     * A mapping of paper names to a list of their authors' names.
+     */
+    private Map<String, List<String>> papers = new HashMap<>();
 
     /**
      * Initialises the class with a list of papers and authors.
@@ -30,6 +37,8 @@ public class ErdosNumbers {
         String[] details = paper.split(":");
         String paperName = details[0];
         String[] authorNames = details[1].split("\\|");
+
+        papers.put(paperName, Arrays.asList(authorNames));
 
         for (int i = 0; i < authorNames.length; i++) {
             String authorName = authorNames[i];

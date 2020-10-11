@@ -167,7 +167,6 @@ public class ErdosNumbers {
             if (!visited.contains(nextAuthor)) {
                 frontier.addAll(this.getCollaborators(nextAuthor));
                 visited.add(nextAuthor);
-
             }
         }
 
@@ -195,7 +194,37 @@ public class ErdosNumbers {
      * @return authors' Erdos number or otherwise Integer.MAX_VALUE
      */
     public int calculateErdosNumber(String author) {
-        // TODO: implement this
+        Set<String> visited = new HashSet<String>();
+
+        // A map containing the current lowest known Erdos number of all explored authors
+        Map<String, Integer> erdosToNode = new HashMap<>();
+        erdosToNode.put(ERDOS, 0);
+
+        // LinkedList used with addFirst and removeLast to act as a Queue
+        LinkedList<String> frontier = new LinkedList<>();
+        frontier.addFirst(ERDOS);
+
+        // Performs a BFS to find the author. Each of the author's collaborators are expanded and added to the frontier
+        // at each iteration.
+        while (frontier.size() > 0) {
+            String currentAuthor = frontier.removeLast();
+
+            int currentAuthorErdos = erdosToNode.get(currentAuthor);
+            for (String collaborator : this.getCollaborators(currentAuthor)) {
+                // The collaborator has never been seen before or there's a new smaller Erdos number for this author
+                if (!visited.contains(collaborator)
+                        || (erdosToNode.containsKey(collaborator)
+                        && currentAuthorErdos + 1 < erdosToNode.get(collaborator))) {
+                    erdosToNode.put(collaborator, currentAuthorErdos + 1);
+                    frontier.addFirst(collaborator);
+                    visited.add(collaborator);
+                }
+            }
+
+            if (currentAuthor.equals(author)) {
+                return erdosToNode.get(author);
+            }
+        }
         
         return 0;
     }

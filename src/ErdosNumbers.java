@@ -248,9 +248,12 @@ public class ErdosNumbers {
      * @return average Erdos number of paper's authors
      */
     public double averageErdosNumber(String paper) {
-        // TODO: implement this
+        int sumErdosNumber = 0;
+        for (String author : this.papers.get(paper)) {
+            sumErdosNumber += this.calculateErdosNumber(author);
+        }
         
-        return 0;
+        return (double) sumErdosNumber / (double) this.papers.get(paper).size();
     }
 
     /**

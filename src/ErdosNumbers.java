@@ -235,7 +235,7 @@ public class ErdosNumbers {
             }
         }
         
-        return 0;
+        return Integer.MAX_VALUE;
     }
 
     /**

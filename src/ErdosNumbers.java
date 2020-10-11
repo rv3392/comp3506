@@ -60,24 +60,18 @@ public class ErdosNumbers {
     private void parseCollaboration(String paperName, String authorName, String otherAuthorName) {
         Author first = this.authors.get(authorName);
         Author second = this.authors.get(otherAuthorName);
-
-        if (!first.hasCollaboratedWith(second)) {
-            Collaboration newAuthorCollaboration = new Collaboration(first, second);
-            first.addCollaboration(second, newAuthorCollaboration);
-            second.addCollaboration(first, newAuthorCollaboration);
-        }
-
-        first.getCollaboration(second).incrementPaperCount();
+        first.addCollaboration(second.getName());
+        second.addCollaboration(first.getName());
     }
 
     private class Author {
         private String name;
-        private Map<String, Collaboration> collaborations;
+        private Map<String, Integer> collaborations;
         private Set<String> papers;
 
         private Author(String name) {
             this.name = name;
-            this.collaborations = new HashMap<String, Collaboration>();
+            this.collaborations = new HashMap<String, Integer>();
             this.papers = new HashSet<String>();
         }
 
@@ -85,20 +79,12 @@ public class ErdosNumbers {
             return this.name;
         }
 
-        private void addCollaboration(Author collaborator, Collaboration newCollaboration) {
-            this.collaborations.put(collaborator.getName(), newCollaboration);
+        private void addCollaboration(String collaborator) {
+            this.collaborations.put(collaborator, this.collaborations.getOrDefault(collaborator, 0) + 1);
         }
 
-        private boolean hasCollaboratedWith(Author collaborater) {
-            if (collaborations.containsKey(collaborater.getName())) {
-                return true;
-            }
-
-            return false;
-        }
-
-        private Collaboration getCollaboration(Author collaborator) {
-            return collaborations.get(collaborator.getName());
+        private int getCollaborationCount(String collaborator) {
+            return collaborations.get(collaborator);
         }
 
         private void addPaper(String paper) {
@@ -111,26 +97,6 @@ public class ErdosNumbers {
 
         private Set<String> getCollaborators() {
             return this.collaborations.keySet();
-        }
-    }
-
-    private class Collaboration {
-        private Author author1;
-        private Author author2;
-        private int numPapersTogether;
-
-        private Collaboration(Author author1, Author author2) {
-            this.numPapersTogether = 0;
-            this.author1 = author1;
-            this.author2 = author2;
-        }
-
-        private void incrementPaperCount() {
-            this.numPapersTogether++;
-        }
-
-        private int getCollaborationCount() {
-            return this.numPapersTogether;
         }
     }
     
@@ -203,39 +169,13 @@ public class ErdosNumbers {
      * @return authors' Erdos number or otherwise Integer.MAX_VALUE
      */
     public int calculateErdosNumber(String author) {
-        Set<String> visited = new HashSet<String>();
+        double erdosNumber = bfsShortestPathLength(ERDOS, author, true);
 
-        // A map containing the current lowest known Erdos number of all explored authors
-        Map<String, Integer> erdosToNode = new HashMap<>();
-        erdosToNode.put(ERDOS, 0);
-
-        // LinkedList used with addFirst and removeLast to act as a Queue
-        LinkedList<String> frontier = new LinkedList<>();
-        frontier.addFirst(ERDOS);
-
-        // Performs a BFS to find the author. Each of the author's collaborators are expanded and added to the frontier
-        // at each iteration.
-        while (frontier.size() > 0) {
-            String currentAuthor = frontier.removeLast();
-
-            int currentAuthorErdos = erdosToNode.get(currentAuthor);
-            for (String collaborator : this.getCollaborators(currentAuthor)) {
-                // The collaborator has never been seen before or there's a new smaller Erdos number for this author
-                if (!visited.contains(collaborator)
-                        || (erdosToNode.containsKey(collaborator)
-                        && currentAuthorErdos + 1 < erdosToNode.get(collaborator))) {
-                    erdosToNode.put(collaborator, currentAuthorErdos + 1);
-                    frontier.addFirst(collaborator);
-                    visited.add(collaborator);
-                }
-            }
-
-            if (currentAuthor.equals(author)) {
-                return erdosToNode.get(author);
-            }
+        if (erdosNumber == Double.MAX_VALUE) {
+            return Integer.MAX_VALUE;
         }
-        
-        return Integer.MAX_VALUE;
+
+        return (int) erdosNumber;
     }
 
     /**
@@ -268,8 +208,51 @@ public class ErdosNumbers {
      * @return author's weighted Erdos number
      */
     public double calculateWeightedErdosNumber(String author) {
-        // TODO: implement this
+        return bfsShortestPathLength(ERDOS, author, false);
+    }
 
-        return 0;
+    private double bfsShortestPathLength(String start, String end, boolean unweighted) {
+        Set<String> visited = new HashSet<String>();
+
+        // A map containing the current lowest known Erdos number of all explored authors
+        Map<String, Double> erdosToNode = new HashMap<>();
+        erdosToNode.put(start, 0.0d);
+
+        // LinkedList used with addFirst and removeLast to act as a Queue
+        LinkedList<String> frontier = new LinkedList<>();
+        frontier.addFirst(start);
+
+        // Performs a BFS to find the author. Each of the author's collaborators are expanded and added to the frontier
+        // at each iteration.
+        while (frontier.size() > 0) {
+            String currentAuthor = frontier.removeLast();
+
+            double currentAuthorErdos = erdosToNode.get(currentAuthor);
+            for (String collaborator : this.getCollaborators(currentAuthor)) {
+                double weight = getEdgeWeight(currentAuthor, collaborator, unweighted);
+                // The collaborator has never been seen before or there's a new smaller Erdos number for this author
+                if (!visited.contains(collaborator)
+                        || (erdosToNode.containsKey(collaborator)
+                        && currentAuthorErdos + weight < erdosToNode.get(collaborator))) {
+                    erdosToNode.put(collaborator, currentAuthorErdos + weight);
+                    frontier.addFirst(collaborator);
+                    visited.add(collaborator);
+                }
+            }
+
+            if (currentAuthor.equals(end)) {
+                return erdosToNode.get(end);
+            }
+        }
+
+        return Double.MAX_VALUE;
+    }
+
+    private double getEdgeWeight(String start, String end, boolean unweighted) {
+        if (unweighted) {
+            return 1.0d;
+        } else {
+            return (double) 1 / (this.authors.get(start).getCollaborationCount(end));
+        }
     }
 }

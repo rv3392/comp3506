@@ -99,6 +99,25 @@ public class ErdosNumbers {
             return this.collaborations.keySet();
         }
     }
+
+    private class ComparableWeightedAuthor implements Comparable {
+        private Author author;
+        private double priority;
+
+        private ComparableWeightedAuthor(Author author, double priority) {
+            this.author = author;
+            this.priority = priority;
+        }
+
+        @Override
+        public int compareTo(Object o) {
+            if (!(o instanceof ComparableWeightedAuthor)) {
+                throw new ClassCastException();
+            }
+
+            return Double.compare(this.priority, ((ComparableWeightedAuthor) o).priority);
+        }
+    }
     
     /**
      * Gets all the unique papers the author has written (either solely or
@@ -169,7 +188,9 @@ public class ErdosNumbers {
      * @return authors' Erdos number or otherwise Integer.MAX_VALUE
      */
     public int calculateErdosNumber(String author) {
-        double erdosNumber = bfsShortestPathLength(ERDOS, author, true);
+        // Use the djikstra's shortest path method as a standard BFS by using a Queue instead of a PriorityQueue and
+        // giving each edge a weight of 1.
+        double erdosNumber = djikstraShortestPathLength(new LinkedList<>(), ERDOS, author, true);
 
         if (erdosNumber == Double.MAX_VALUE) {
             return Integer.MAX_VALUE;
@@ -208,39 +229,42 @@ public class ErdosNumbers {
      * @return author's weighted Erdos number
      */
     public double calculateWeightedErdosNumber(String author) {
-        return bfsShortestPathLength(ERDOS, author, false);
+        // Apply djikstra's algorithm with a PriorityQueue being used as the frontier.
+        return djikstraShortestPathLength(new PriorityQueue<>(), ERDOS, author, false);
     }
 
-    private double bfsShortestPathLength(String start, String end, boolean unweighted) {
-        Set<String> visited = new HashSet<String>();
+    private double djikstraShortestPathLength(Queue<ComparableWeightedAuthor> frontier, String start, String end,
+             boolean unweighted) {
+        Set<String> visited = new HashSet<>();
 
         // A map containing the current lowest known Erdos number of all explored authors
         Map<String, Double> erdosToNode = new HashMap<>();
         erdosToNode.put(start, 0.0d);
 
         // LinkedList used with addFirst and removeLast to act as a Queue
-        LinkedList<String> frontier = new LinkedList<>();
-        frontier.addFirst(start);
+
+        frontier.add(new ComparableWeightedAuthor(this.authors.get(start), 0.0));
 
         // Performs a BFS to find the author. Each of the author's collaborators are expanded and added to the frontier
         // at each iteration.
         while (frontier.size() > 0) {
-            String currentAuthor = frontier.removeLast();
+            ComparableWeightedAuthor currentAuthor = frontier.remove();
 
-            double currentAuthorErdos = erdosToNode.get(currentAuthor);
-            for (String collaborator : this.getCollaborators(currentAuthor)) {
-                double weight = getEdgeWeight(currentAuthor, collaborator, unweighted);
+            double currentAuthorErdos = erdosToNode.get(currentAuthor.author.name);
+            for (String collaborator : this.getCollaborators(currentAuthor.author.name)) {
+                double weight = getEdgeWeight(currentAuthor.author.name, collaborator, unweighted);
                 // The collaborator has never been seen before or there's a new smaller Erdos number for this author
                 if (!visited.contains(collaborator)
                         || (erdosToNode.containsKey(collaborator)
                         && currentAuthorErdos + weight < erdosToNode.get(collaborator))) {
                     erdosToNode.put(collaborator, currentAuthorErdos + weight);
-                    frontier.addFirst(collaborator);
+                    frontier.add(new ComparableWeightedAuthor(this.authors.get(collaborator),
+                            currentAuthorErdos + weight));
                     visited.add(collaborator);
                 }
             }
 
-            if (currentAuthor.equals(end)) {
+            if (currentAuthor.author.name.equals(end)) {
                 return erdosToNode.get(end);
             }
         }

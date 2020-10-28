@@ -27,8 +27,12 @@ public class FactChecker {
         // B_arriving -> A_leaving.
         for (Fact fact : facts) {
             switch (fact.getType()) {
-                case TYPE_ONE -> addNewTypeOneFact(fact, people);
-                case TYPE_TWO -> addNewTypeTwoFact(fact, people);
+                case TYPE_ONE:
+                    addNewTypeOneFact(fact, people);
+                    break;
+                case TYPE_TWO:
+                    addNewTypeTwoFact(fact, people);
+                    break;
             }
         }
 

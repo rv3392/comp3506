@@ -111,7 +111,7 @@
 				
 				The best case running time of the algorithm occurs when the input $n$ is odd. This is because the running time for odd $n$ is $3n$ whereas the running time for even $n$ is $2n^3$. The Big-O bound for the odd case is $O(n)$.
 
-				Conversely, the worst case must be for the even case or when the running time is $2n^3$. The Big-$\Theta$ for this case is $O(n^3)$.
+				Conversely, the worst case must be for the even case or when the running time is $2n^3$. The Big-$\Omega$ for this case is $O(n^3)$.
 
 				Both of these bounds have been proven in previous sections.
 			\end{Solution}
@@ -140,8 +140,9 @@
 	      	\item (2 marks) Your classmate tells you that Big-O represents the worst case runtime of an algorithm, and similarly that Big-$\Omega$ represents the best case runtime. Is your classmate correct? Explain why/why not. Your answers for (e) and (f) \textit{may} be useful for answering this.
 	      	      
 			\begin{Solution}
+				Tight Big-O and Big-$\Omega$ represent the worst case time complexity and best case time complexity, respectively. This is not exactly the same as runtime and instead simply provides a class for the algorithm. The runtime could be better or worse than the Big-O and Big-$\Omega$ time complexity due to constants and other factors.
 				
-				While this can be true in some cases, it can not be generalised. This is because the Big-O of an algorithm is the the tightest bound of the algorithm from above, and thus the worst case, while Big-$\Omega$ is the tightest bound from below and thus the best case. If the best and worst case runtime of the algorithm are both equal, then the classmate's statement is correct.
+				Furthermore, while a tight Big-O and Big-$\Omega$ bound can represent the worst case and best case respectively, it is possible for non-tight bounds to exist. For example, all algorithms can be said to be $\Omega(1)$, however that does not mean they ever actually run with that time complexity. 
 			\end{Solution}
 			  
 			\medskip
@@ -487,15 +488,22 @@
 	      	      
 			\begin{Solution}
 
-				It is possible to use a divide and conquer approach with two parts to identify the water source. 
-				
-				The first part of the algorithm can be called as a helper function that takes integers m and n - the range currently being searched. This helper searches for the column and/or row the source is in by scanning diagonally across the grid using a similar approach to binary search. It will start at the square $(n/2, n/2)$ if $n$ is even or $((n - 1)/2, (n - 1)/2)$ if $n$ is odd. This square is drilled and the hydrologists consulted. If the square drilled is in the same row or column as the water source then the square's coordinates are returned. 
-				
-				Otherwise, if the square is not in the same row or column as the water source and if the drill bit is broken by the drilling, the function is recursively called with $(0, n/2)$ or $(0, (n - 1)/2)$ for even and odd values respectively. If the drill bit is not broken by the drill then the function is recursively called with $((n - 1)/2, n)$. 
-
-				The second part of the algorithm occurs after the helper function of the first part has returned a coordinate. In the second part of the algorithm a helper function uses the hydrologists consultation to binary search along the row or column identified in the first helper. The helper function takes two values First the hydrologists are consulted to see which direction the water source is in.
-
-				This algorithm drills $log(n)$ holes for the first helper and $log(n)$ holes for the second helper where $n$ is the height and width as defined in the question and also the length of the diagonal (since $\sqrt{n^2} = n$). This is because both sub-algorithms halve the potential search space on each of their recursive calls. Hence, the overall number of holes drilled can be said to be $2log(n) + a$ where $n$ is as defined in the question and $a$ is a constant representing any primitive operations called as initialisation and between the two helpers. As such, it can be said that this algorithm is $O(log(n))$.
+				It is possible to use a divide and conquer approach with two parts to identify the water source.
+				\\
+				\\
+				To start off with, it is assumed that the action drilling runs in constant time and is able to identify if the drill bit is broken after it occurs. Furthermore, it is assumed that a drill is required before the hydrologists can be asked which direction the water source is in and if it is inline at all.
+				\\
+				\\
+				The first part of the algorithm is called as a helper function and essentially acts as a binary search of the spaces in row 0 (y = 0) to identify the column that the water source is in. It will run as a single helper function that starts by drilling the centre of the given upper and lower bound and recursively calls itself with parameters dependent on if the drill bit was broken by the drilling. That is, the helper is first called with the input parameters $(m, n) = (0, n)$ representing the lower bound and upper bound of the search range. It starts by drilling at $((m + n)/2, 0)$, the centre of the search range, and consulting the hydrologists. If the hydrologists say that the water source is up from the current drilling location, that is the space drilled is in the same column as the water source, then the helper returns the column/y-value. Otherwise, if the drill bit breaks it calls itself with parameters $((m + n)/2, n)$ and if the drill bit is not broken after the drilling then it calls itself with parameters $(m, (m + n)/2)$. This way the algorithm recursively binary searches row 0.
+				\\
+				\\
+				The second part of the algorithm is very similar to the first part but instead it binary searches column 0 to try and find the row the water source is in. This part does not require any information from the first part as it performs a second independent binary search. Similar to the first part the algorithm takes two parameters $m$ and $n$, which represent the lower and upper bound on column 0. The helper is first called with $(m, n) = (0, n)$ and it starts by drilling at $(0, (m + n)/2)$. After this the hydrologists are consulted and if the drilled location is inline with the water source then the current row of the drilled location is returned as the row/x-value of the water source. Otherwise, if the current location is not inline with the water source and the drill bit breaks then the helper recursively calls itself with parameters $(m, (m + n)/2)$. If the drill bit does not break then the helper calls itself with parameters $((m + n)/2, n)$. This way the search space is halved after each call and the search is much faster than linear time as explained further below.
+				\\
+				\\
+				After both of these helper functions are called the algorithm has identified both the row and the column that the water source is in and thus the location of the water source. Those two values are returned.
+				\\
+				\\
+				This algorithm drills $log(n)$ holes for the first helper and $log(n)$ holes for the second helper where $n$ is the height and width as defined in the question. This is because both sub-algorithms halve the potential search space on each of their recursive calls. Hence, the overall number of holes drilled can be said to be $2log(n) + a$ where $n$ is as defined in the question and $a$ is a constant representing any primitive operations called as initialisation and between the two helpers. As such, it can be said that this algorithm is $O(log(n))$.
 	      	\end{Solution}
 	      	      	      	              
 	      	\item 
@@ -509,9 +517,101 @@
 	      	      Your algorithm's time complexity should be as efficient as possible in order to receive marks. 
 	      	      (Hint: A linear time algorithm is not efficient enough for full marks.)
 	      	      
-	      	\begin{Solution}
-	      	\end{Solution}
-	      	      	      	              
+			\begin{Solution}
+				\begin{algorithm}
+					\begin{algorithmic}
+						\Procedure{AskHydrologist}{int x, int y}
+							\State $\textbf{return}$ Returns whether the water source is up, down, left or right of the location (x, y) using integers 1, 2, 3 and 4, respectively. If the location (x, y) is not inline with the water source and not the water source itself then 0 is returned. If the location (x, y) is a water source then 5 is returned.
+						\EndProcedure
+					\end{algorithmic}
+				\end{algorithm}
+				\begin{algorithm}
+					\begin{algorithmic}
+						\Procedure{Drill}{int x, int y}
+							\State $\textbf{return}$ The location (x, y) is drilled and if the drill bit is unbroken 0 is returned, otherwise 1 is returned.
+						\EndProcedure
+					\end{algorithmic}
+				\end{algorithm}
+				\begin{algorithm}
+					\begin{algorithmic}
+						\Procedure{FindWaterSourceX}{int n, int startJumpSize}
+							\State jumpSize $\gets$ startJumpSize
+							\State currentX $\gets 0$
+							\State previousX $\gets 0$
+							\State drillResult $\gets$ Drill(currentX, 0)
+							\\
+							\While{drillResult != 1}
+								\State previousX $\gets$ currentX
+								\State currentX $\gets$ currentX + jumpSize
+								\State jumpSize $\gets$ jumpSize - 1
+								\State drillResult $\gets$ Drill(currentX, 0)
+							\EndWhile
+							\\
+							\State currentX $\gets$ previousX
+							\State Drill(currentX, 0)
+							\State hydrologistResult $\gets$  AskHydrologist(currentX, 0)
+							\While{hydrologistResult == 0}
+								\State currentX $\gets$ currentX + 1
+								\State Drill(currentX, 0)
+								\State hydrologistResult $\gets$ AskHydrologist(currentX, 0)
+							\EndWhile
+							\\
+							\State sourceX $\gets$ currentX
+							\State $\textbf{return}$ sourceX
+						\EndProcedure
+					\end{algorithmic}
+				\end{algorithm}
+				\begin{algorithm}
+					\begin{algorithmic}
+						\Procedure{FindWaterSourceY}{int n, int startJumpSize}
+							\State jumpSize $\gets$ startJumpSize
+							\State currentY $\gets 0$
+							\State previousY $\gets 0$
+							\State drillReslt $\gets$ Drill(0, currentY)
+							\\
+							\While{drillResult != 1}
+								\State previousY $\gets$ currentY
+								\State currentY $\gets$ currentY + jumpSize
+								\State jumpSize $\gets$ jumpSize - 1
+								\State drillResult $\gets$ Drill(0, currentY)
+							\EndWhile
+							\\
+							\State currentY $\gets$ previousY
+							\State Drill(0, currentY)
+							\State hydrologistResult $\gets$  
+							\While{hydrologistResult == 0}
+								\State currentY $\gets$ currentY + 1
+								\State Drill(0, currentY)
+								\State hydrologistResult $\gets$ AskHydrologist(0, currentY)
+							\EndWhile
+							\\
+							\State sourceY $\gets$ currentY		
+							\State $\textbf{return}$ sourceY
+						\EndProcedure
+					\end{algorithmic}
+				\end{algorithm}
+				\medskip
+				\begin{algorithm}
+					\begin{algorithmic}
+						\Procedure{FindWaterSource}{int n}
+							\State jumpSize $\gets ceil(0.5 * (sqrt(8 * n + 1) - 1))$
+							\State sourceX $\gets$ FindWaterSourceX(n, jumpSize)
+							\State sourceY $\gets$ FindWaterSourceY(n, jumpSize)
+							\State $\textbf{return}$ (sourceX, sourceY)
+						\EndProcedure
+					\end{algorithmic}
+				\end{algorithm}
+				\medskip\newpage
+				This algorithm works using a similar method to the previous algorithm, however instead of using binary search the size of the jump made is dynamic depending on how far the previous element was from the start of a row or column. 
+
+				The first jump made for both searching the rows and columns is $k$ spaces long and each subsequent jump is $k - 1$, $k - 2$, $k - 3$, ... $1$ spaces long or a sequence where the sum of all terms is $\geq n$ where $n$ is the width and height of the grid. That isthe sum, $k + (k - 1) + (k - 2) + ... + 1 \geq n$ which is simplified to $\frac{k(k + 1)}{2} \geq n$. The solution of the above inequality is $k = \frac{1}{2}(\sqrt{8n + 1} - 1)$ and so the first jump's size must be $\left\lceil{(\frac{1}{2}(\sqrt{8n + 1}- 1))}\right\rceil$.
+
+				The algorithm begins by searching columns using the above jump size as a starting point. When a drill is broken, it goes to the previous position and reduces its jump size to 1. This finds the column which the water source is in.
+
+				A similar method is then employed to find the row the water source is in and the location of the water source is returned.
+
+				As mentioned above the first jump is of size $\left\lceil{(\frac{1}{2}(\sqrt{8n + 1}- 1))}\right\rceil$, with each subsequent jump being one space smaller than the last. As the jump size decreases, the number of jumps required to search the space between jumps increases proportionally. That is, the size of the $i-th$ jump can be given by the formula $k - i$, where $k$ is the initial jump size and $i$ is the number of jumps made. Thus, since $i$ jumps are always required to reach a jump size of $k - i$ spaces, the most number of drills required is $k - i + i = k$, while the smallest is $k - i + 1$. Since $k$ is $\frac{n}{\frac{1}{2}(\sqrt{8n + 1}- 1))} = \frac{1}{4}(\sqrt{8n + 1} + 1) = \sqrt{\frac{1}{2}n + \frac{1}{16}} + \frac{1}{4}$ that is the maximum amount of drills required for a single side in the worst case. As such, for both sides the combined worst case is $\sqrt{2n + \frac{1}{4}} + \frac{1}{2}$ drills. Thus, this is a $O(\sqrt{n})$ algorithm.
+			  \end{Solution}
 	      \end{enumerate}     	          
 \end{enumerate}
 \end{document}
